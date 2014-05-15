@@ -37,6 +37,16 @@ This plugin overrides the C<build_id()> method in L<Dancer::Session::Abstract|Da
 
 The options are passed into C<makerandom_octet(...)>, so any option described in L<Crypt::Random|Crypt::Random> are valid here. The defaults are Strength=1 and Length=16. These options can be set with plugin settings, too.
 
+    use_secure_session_id(Length => 20, Uniform => 1, Skip => 512);
+
+same as:
+
+	plugins:
+	  SecureSessionID:
+	    Length: 20
+		Uniform: 1
+		Skip: 512
+
 The result is encoded with C<base64url()>. A length of 16 random bytes results in 22 characters.
 
 =cut

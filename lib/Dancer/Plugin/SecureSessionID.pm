@@ -59,12 +59,11 @@ register use_secure_session_id => sub {
 		@_
 	);
 	no strict 'refs';
-	undef *{'Dancer::Session::Abstract::build_id'};
+	no warnings 'redefine';
 	*{'Dancer::Session::Abstract::build_id'} = sub {
 		my $r = Crypt::Random::makerandom_octet(%options);
 		return MIME::Base64::encode_base64url($r,'');
 	};
-	use strict 'refs';
 };
 
 =head1 SECURITY WARNING

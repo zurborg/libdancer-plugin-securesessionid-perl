@@ -11,7 +11,7 @@ use MIME::Base64 ();
 
 =head1 NAME
 
-Dancer::Plugin::SecureSessionID - Dancer-Plugin-SecureSessionID
+Dancer::Plugin::SecureSessionID - A secure replacement of Dancer's built-in session id generator
 
 =head1 VERSION
 

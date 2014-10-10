@@ -11,7 +11,7 @@
 		'Modern::Perl'		=> 0,
         'Test::More'		=> 0,
 		'Dancer'			=> 1.312,
-		'Crypt::Random'		=> 1.25,
+		'Crypt::OpenSSL::Random'		=> 0.04,
 		'MIME::Base64'		=> 3.14,
     },
     dist => {

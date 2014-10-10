@@ -4,11 +4,11 @@ Dancer::Plugin::SecureSessionID - A secure replacement of Dancer's built-in sess
 
 # VERSION
 
-Version 0.01
+Version 0.02
 
 # DESCRIPTION
 
-This plugin overrides the `build_id()` method in [Dancer::Session::Abstract](https://metacpan.org/pod/Dancer::Session::Abstract) and make use of [Crypt::Random](https://metacpan.org/pod/Crypt::Random) to get really secure random session ids.
+This plugin overrides the `build_id()` method in [Dancer::Session::Abstract](https://metacpan.org/pod/Dancer::Session::Abstract) and make use of [Crypt::OpenSSL::Random](https://metacpan.org/pod/Crypt::OpenSSL::Random) to get really secure random session ids.
 
 # AUTHOR
 

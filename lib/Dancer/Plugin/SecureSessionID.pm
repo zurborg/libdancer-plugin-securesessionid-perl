@@ -6,7 +6,7 @@ use Carp 'croak';
 use Dancer ':syntax';
 use Dancer::Plugin;
 use Dancer::Session::Abstract ();
-use Crypt::Random ();
+use Crypt::OpenSSL::Random ();
 use MIME::Base64 ();
 
 =head1 NAME
@@ -15,11 +15,11 @@ Dancer::Plugin::SecureSessionID - A secure replacement of Dancer's built-in sess
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -29,13 +29,15 @@ our $VERSION = '0.01';
 
 =head1 DESCRIPTION
 
-This plugin overrides the C<build_id()> method in L<Dancer::Session::Abstract|Dancer::Session::Abstract> and make use of L<Crypt::Random|Crypt::Random> to get really secure random session ids.
+This plugin overrides the C<build_id()> method in L<Dancer::Session::Abstract|Dancer::Session::Abstract> and make use of L<Crypt::OpenSSL::Random|Crypt::OpenSSL::Random> to get really secure random session ids.
 
 =head1 METHODS
 
 =head2 C<< use_secure_session_id([ %options ]) >>
 
-The options are passed into C<makerandom_octet(...)>, so any option described in L<Crypt::Random|Crypt::Random> are valid here. The defaults are Strength=1 and Length=16. These options can be set with plugin settings, too.
+In a previous version of the module, the options ware passed into C<Crypt::Random::makerandom_octet(...)>. For compatibility reasons, the option-keys Strength, Length and Skip are still valid. B<Other option-keys are no longer supported>.
+
+The defaults are Strength=1 and Length=16. These options can be set with plugin settings, too.
 
 	use_secure_session_id(Length => 20, Uniform => 1, Skip => 512);
 
@@ -58,10 +60,19 @@ register use_secure_session_id => sub {
 		%{ plugin_setting || {} },
 		@_
 	);
+	warn "option 'Uniform' is deprecated" if $options{Uniform};
 	no strict 'refs';
 	no warnings 'redefine';
 	*{'Dancer::Session::Abstract::build_id'} = sub {
-		my $r = Crypt::Random::makerandom_octet(%options);
+		my $r;
+		$options{Skip} ||= 0;
+		if ($options{Strength}) {
+			$r = Crypt::OpenSSL::Random::random_bytes($options{Length} + $options{Skip});
+		} else {
+			$r = Crypt::OpenSSL::Random::random_pseudo_bytes($options{Length} + $options{Skip});
+		}
+		use bytes;
+		$r = substr($r, $options{Skip});
 		return MIME::Base64::encode_base64url($r,'');
 	};
 };
@@ -70,7 +81,7 @@ register use_secure_session_id => sub {
 
 Any session module which does not override C<build_id()> make profit from this plugin. This behaviour may change in future. Don't rely on it without auditing the source code of the affected session modules. By now, both the Simple and YAML session engines (shipped with the Dancer package) do not override C<build_id> so this plugin works as expected.
 
-Addtionally, mind the section about blocking behaviour in the documentation of L<Crypt::Random|Crypt::Random>. If you app blocks, you can set the C<Strength> option to 0. This may be a lack of security but it helps to improve performance. Since your app cause network traffic, the entropy pool will be recharched often enough to never get blocked. See also L<the manpage of your random device|random(4)>.
+Addtionally, mind the blocking behaviour when C<Strength=1> is requested. If your application blocks, you can set the C<Strength> option to 0. This may be a lack of security but it helps to improve performance. Since your application cause network traffic, the entropy pool will be recharged often enough to never get stalled. See also L<the manpage of your random device|random(4)>.
 
 =head1 AUTHOR
 

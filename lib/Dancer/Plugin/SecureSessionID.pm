@@ -50,7 +50,7 @@ register use_secure_session_id => sub {
 		@_
 	);
 	warn "option 'Uniform' is deprecated" if $options{Uniform};
-	no strict 'refs';
+	no strict 'refs'; ## no critic
 	no warnings 'redefine';
 	*{'Dancer::Session::Abstract::build_id'} = sub {
 		my $r;
